@@ -1,0 +1,3 @@
+include setup.py README.md CHANGELOG.md MANIFEST.in LICENSE *.txt
+graft tests
+global-exclude *~
