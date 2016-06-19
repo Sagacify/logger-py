@@ -1,0 +1,208 @@
+Metadata-Version: 1.0
+Name: bunyan
+Version: 0.1.2
+Summary: Bunyan python logger
+Home-page: https://www.github.com/uphold/python-bunyan/
+Author: Jorge Alpedrinha Ramos
+Author-email: python@uphold.com
+License: LICENSE
+Description: python-bunyan
+        =============
+        
+        Json logger compatible with
+        `node-bunyan <https://github.com/trentm/node-bunyan>`__
+        
+        Get the code
+        ============
+        
+        .. code:: sh
+        
+            git clone git@github.com:uphold/python-bunyan.git
+        
+        Install
+        =======
+        
+        .. code:: sh
+        
+            pip install bunyan
+        
+        How to setup
+        ============
+        
+        Programatically
+        ---------------
+        
+        Create a new log handler and assign a ``BunyanFormatter`` formatter.
+        Register the handler on the current logger.
+        
+        .. code:: py
+        
+            import bunyan
+            import logging
+            import sys
+        
+            logger = logging.getLogger()
+        
+            logHandler = logging.StreamHandler(stream = sys.stdout)
+            formatter = bunyan.BunyanFormatter()
+            logHandler.setFormatter(formatter)
+            logger.addHandler(logHandler)
+            logger.setLevel(logging.DEBUG)
+        
+        Using dictConfig
+        ----------------
+        
+        This is the same example as defined above, but using a dictionary with
+        ``dictConfig``.
+        
+        .. code:: py
+        
+            LOG_CONFIG = {
+              'formatters': {
+                'bunyan': {
+                  '()' : 'bunyan.BunyanFormatter'
+                }
+              },
+              'handlers': {
+                'debug': {
+                  'class': 'logging.StreamHandler',
+                  'formatter': 'bunyan',
+                  'stream': 'ext://sys.stdout'
+                },
+              },
+        
+              'root': {
+                'level': 'DEBUG',
+                'handlers': ['debug']
+              },
+              'version': 1
+            }
+        
+            import logging.config
+            logging.config.dictConfig(config)
+        
+        How to use
+        ==========
+        
+        After setting up your loggers, bunyan allows to log in two different
+        ways: - Traditional - Using a dictionary
+        
+        Traditional logging
+        -------------------
+        
+        String message
+        ~~~~~~~~~~~~~~
+        
+        Traditionaly logging in python allows to log a string message.
+        
+        .. code:: py
+        
+            logger.debug("This is a log message")
+        
+        This will output:
+        
+        .. code:: json
+        
+            {
+              "name": "root",
+              "pathname": "test.py",
+              "levelname": "DEBUG",
+              "msg": "This is a log message",
+              "time": "2016-03-14T16:34:47Z",
+              "hostname": "jalpedrinha-mbp.local",
+              "level": 20,
+              "pid": 41414,
+              "v": 0
+            }
+        
+        String message with extra dictionary
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        
+        This module extends this functionality by allowing an extra keyword arg,
+        and passing a dictionary.
+        
+        .. code:: py
+        
+            logger.debug("This is a log message with extra context", extra = {'some': 'additional data'})
+        
+        And the output will include ``some`` key and value:
+        
+        .. code:: json
+        
+            {
+              "name": "root",
+              "time": "2016-03-14T16:36:12Z",
+              "some": "additional data",
+              "pathname": "test.py",
+              "msg": "This is a log message with extra context",
+              "levelname": "DEBUG",
+              "hostname": "jalpedrinha-mbp.local",
+              "level": 20,
+              "pid": 41495,
+              "v": 0
+            }
+        
+        Dictionary
+        ----------
+        
+        This method works similarly to using an extra dictionary without the
+        string message, but instead of passing a keyword argument extra, you
+        just pass the first positional argument as a dictionary.
+        
+        .. code:: py
+        
+            logger.debug({'some': 'data'})
+        
+        Which results in:
+        
+        .. code:: json
+        
+            {
+              "name": "root",
+              "some": "data",
+              "pathname": "test.py",
+              "msg": "",
+              "time": "2016-03-14T16:45:23Z",
+              "levelname": "DEBUG",
+              "hostname": "jalpedrinha-mbp.local",
+              "level": 20,
+              "pid": 43263,
+              "v": 0
+            }
+        
+        Testing
+        =======
+        
+        Docker-compose and tox
+        ----------------------
+        
+        Run tox container:
+        
+        .. code:: sh
+        
+            docker-compose up
+        
+        Natively
+        --------
+        
+        First, install ``dev-requirements``
+        
+        .. code:: sh
+        
+            pip install -r dev-requirements.txt
+        
+        Then run nose:
+        
+        ::
+        
+            nosetests tests
+        Changelog
+        ---------
+        
+        0.1.0 / 2016-03-15
+        ~~~~~~~~~~~~~~~~~~
+        
+        -  `#2 <https://github.com/uphold/python-bunyan/pull/2>`__ Add Bunyan
+           Formatter (@jAlpedrinha)
+        
+Platform: UNKNOWN
