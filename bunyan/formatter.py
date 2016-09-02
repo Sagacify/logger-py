@@ -8,6 +8,8 @@ import json
 import logging
 import socket
 import traceback
+import os
+import sys
 
 from inspect import istraceback
 
@@ -103,6 +105,7 @@ class BunyanFormatter(logging.Formatter):
             'thread',
             'threadName',
         ]
+        self.app_name = sys.argv[0].split(os.sep)[-1]
 
         def log_format(x):
             return ["%({0:s})".format(i) for i in x]
@@ -183,6 +186,11 @@ class BunyanFormatter(logging.Formatter):
             log_record['msg'] = log_record['message']
         else:
             log_record['msg'] = ""
+
+        if 'name' in log_record:
+            log_record['module'] = log_record['name']
+
+        log_record['name'] = self.app_name
 
         log_record['pid'] = log_record['process']
         log_record['v'] = 0
