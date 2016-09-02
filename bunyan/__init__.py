@@ -1,6 +1,6 @@
 """
 Logging configuration utils.
 
-Contains bunyan formatter and config loader.
+Contains saga formatter and function to create a logger.
 """
-from .formatter import BunyanFormatter
+from .formatter import SagaFormatter

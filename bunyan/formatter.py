@@ -68,12 +68,12 @@ def get_json_handler(datefmt):
     return handler
 
 
-class BunyanFormatter(logging.Formatter):
+class SagaFormatter(logging.Formatter):
     """
-    Bunyan Formatter.
+    Saga Formatter.
 
     Implements a logging Formatter by extending jsonlogger.JsonFormatter
-    to use bunyan's standard names and values.
+    to imitate saga-logger.js (based on Bunyan)
     """
     def __init__(self, *args, **kwargs):
         """

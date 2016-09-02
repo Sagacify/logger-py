@@ -26,7 +26,7 @@ class TestJsonLogger(unittest.TestCase):
         self.logger.addHandler(self.logHandler)
 
     def testDefaultFormat(self):
-        fr = bunyan.BunyanFormatter()
+        fr = bunyan.SagaFormatter()
         self.logHandler.setFormatter(fr)
 
         msg = "testing logging format"
@@ -45,7 +45,7 @@ class TestJsonLogger(unittest.TestCase):
             'time',
             'v'
         ]
-        fr = bunyan.BunyanFormatter()
+        fr = bunyan.SagaFormatter()
         self.logHandler.setFormatter(fr)
 
         msg = "testing bunyan"
@@ -57,7 +57,7 @@ class TestJsonLogger(unittest.TestCase):
             self.assertIn(supported_key, log_json)
 
     def testLogADict(self):
-        fr = bunyan.BunyanFormatter()
+        fr = bunyan.SagaFormatter()
 
         self.logHandler.setFormatter(fr)
 
@@ -78,7 +78,7 @@ class TestJsonLogger(unittest.TestCase):
         self.assertEqual(logJson["msg"], "")
 
     def testLogExtra(self):
-        fr = bunyan.BunyanFormatter()
+        fr = bunyan.SagaFormatter()
 
         self.logHandler.setFormatter(fr)
 
@@ -91,7 +91,7 @@ class TestJsonLogger(unittest.TestCase):
             }
         }
 
-        self.logger.info("yo", extra = extra)
+        self.logger.info("yo", extra=extra)
         logJson = json.loads(self.logBuffer.getvalue())
 
         self.assertEqual(logJson.get("the"), extra["the"])
@@ -101,7 +101,7 @@ class TestJsonLogger(unittest.TestCase):
         self.assertEqual(logJson["msg"], "yo")
 
     def testJsonDefaultEncoder(self):
-        fr = bunyan.BunyanFormatter()
+        fr = bunyan.SagaFormatter()
 
         self.logHandler.setFormatter(fr)
 
@@ -118,22 +118,22 @@ class TestJsonLogger(unittest.TestCase):
 
     def testJsonCustomLogicAddsField(self):
 
-        class LeBunyanFormatter(bunyan.BunyanFormatter):
+        class LeSagaFormatter(bunyan.SagaFormatter):
             def process_log_record(self, log_record):
                 log_record["addit"] = "added"
                 return super(
-                    LeBunyanFormatter,
+                    LeSagaFormatter,
                     self
                 ).process_log_record(log_record)
 
-        self.logHandler.setFormatter(LeBunyanFormatter())
+        self.logHandler.setFormatter(LeSagaFormatter())
         self.logger.info("yo")
 
         logJson = json.loads(self.logBuffer.getvalue())
         self.assertEqual(logJson.get("addit"), "added")
 
     def testExcInfo(self):
-        fr = bunyan.BunyanFormatter()
+        fr = bunyan.SagaFormatter()
 
         self.logHandler.setFormatter(fr)
         try:
