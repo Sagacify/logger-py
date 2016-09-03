@@ -11,22 +11,22 @@ except ImportError:
     # Python 3 Support
     from io import StringIO
 
-sys.path.append('../bunyan')
-import bunyan
+sys.path.append('../sagalogger')
+import sagalogger
 
 
 class TestJsonLogger(unittest.TestCase):
     def setUp(self):
         self.logBuffer = StringIO()
 
-        self.logger = logging.getLogger('bunyan-test')
+        self.logger = logging.getLogger('sagalogger-test')
         self.logger.setLevel(logging.DEBUG)
 
         self.logHandler = logging.StreamHandler(self.logBuffer)
         self.logger.addHandler(self.logHandler)
 
     def testDefaultFormat(self):
-        fr = bunyan.SagaFormatter()
+        fr = sagalogger.SagaFormatter()
         self.logHandler.setFormatter(fr)
 
         msg = "testing logging format"
@@ -45,10 +45,10 @@ class TestJsonLogger(unittest.TestCase):
             'time',
             'v'
         ]
-        fr = bunyan.SagaFormatter()
+        fr = sagalogger.SagaFormatter()
         self.logHandler.setFormatter(fr)
 
-        msg = "testing bunyan"
+        msg = "testing sagalogger"
         self.logger.info(msg)
         log_msg = self.logBuffer.getvalue()
         log_json = json.loads(log_msg)
@@ -57,7 +57,7 @@ class TestJsonLogger(unittest.TestCase):
             self.assertIn(supported_key, log_json)
 
     def testLogADict(self):
-        fr = bunyan.SagaFormatter()
+        fr = sagalogger.SagaFormatter()
 
         self.logHandler.setFormatter(fr)
 
@@ -78,7 +78,7 @@ class TestJsonLogger(unittest.TestCase):
         self.assertEqual(logJson["msg"], "")
 
     def testLogExtra(self):
-        fr = bunyan.SagaFormatter()
+        fr = sagalogger.SagaFormatter()
 
         self.logHandler.setFormatter(fr)
 
@@ -101,7 +101,7 @@ class TestJsonLogger(unittest.TestCase):
         self.assertEqual(logJson["msg"], "yo")
 
     def testJsonDefaultEncoder(self):
-        fr = bunyan.SagaFormatter()
+        fr = sagalogger.SagaFormatter()
 
         self.logHandler.setFormatter(fr)
 
@@ -118,7 +118,7 @@ class TestJsonLogger(unittest.TestCase):
 
     def testJsonCustomLogicAddsField(self):
 
-        class LeSagaFormatter(bunyan.SagaFormatter):
+        class LeSagaFormatter(sagalogger.SagaFormatter):
             def process_log_record(self, log_record):
                 log_record["addit"] = "added"
                 return super(
@@ -133,7 +133,7 @@ class TestJsonLogger(unittest.TestCase):
         self.assertEqual(logJson.get("addit"), "added")
 
     def testExcInfo(self):
-        fr = bunyan.SagaFormatter()
+        fr = sagalogger.SagaFormatter()
 
         self.logHandler.setFormatter(fr)
         try:
