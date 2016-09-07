@@ -9,7 +9,7 @@ except(IOError, ImportError, OSError):
 
 setup(
   name='sagalogger',
-  version='0.2.0',
+  version='0.2.1',
   author='Augustin Borsu',
   author_email='dev@sagacify.com',
   packages=['sagalogger'],
