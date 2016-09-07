@@ -23,32 +23,13 @@ def get_logger(module):
             }
         )
 
-    def fatal(event, data=None, meta=None):
-        log(50, event, data, meta)
+    for name, level in LOG_LEVELS.items():
+        logger.__setattr__(
+            name,
+            lambda event, data=None, meta=None, level=level:
+                log(level, event, data, meta))
 
-    def error(event, data=None, meta=None):
-        log(40, event, data, meta)
-
-    def warn(event, data=None, meta=None):
-        log(30, event, data, meta)
-
-    def info(event, data=None, meta=None):
-        log(20, event, data, meta)
-
-    def debug(event, data=None, meta=None):
-        log(10, event, data, meta)
-
-    def trace(event, data=None, meta=None):
-        log(0, event, data, meta)
-
-    logger.__setattr__("fatal", fatal)
-    logger.__setattr__("error", error)
-    logger.__setattr__("warn", warn)
-    logger.__setattr__("info", info)
-    logger.__setattr__("debug", debug)
-    logger.__setattr__("trace", trace)
     return logger
-
 
 # Bunyan log levels are slightly different cfr:
 # https://docs.python.org/2/library/logging.html#levels
