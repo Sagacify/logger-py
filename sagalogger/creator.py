@@ -8,6 +8,12 @@ def get_logger(module):
     logger = logging.getLogger(module)
 
     def log(level, event, data=None, meta=None):
+        if not isinstance(event, str):
+            event = event.__repr__()
+        if (data is not None and isinstance(data, str)):
+            data = {"message": data}
+        if (meta is not None and isinstance(meta, str)):
+            meta = {"message": meta}
         logger.log(
             level,
             {
