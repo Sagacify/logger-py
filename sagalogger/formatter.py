@@ -84,11 +84,22 @@ class SagaFormatter(logging.Formatter):
             'exc_info',
             'levelno',
             'message',
-            'name',
             'process',
+            'name',
+            'module',
+            'level',
+            'version',
+            # 'filename',
+            # 'pathname'
+            # 'hostname',
+            # 'event',
+            # 'meta'
         ]
         self._skip_fields = self._required_fields[:]
         self._skip_fields += [
+            'data',
+            'msg',
+            'pid',
             'args',
             'created',
             'exc_text',
@@ -187,10 +198,10 @@ class SagaFormatter(logging.Formatter):
         else:
             log_record['msg'] = ""
 
-        if 'name' in log_record:
-            log_record['module'] = log_record['name']
+        # if 'name' in log_record:
+        #     log_record['module'] = log_record['name']
 
-        log_record['name'] = self.app_name
+        # log_record['module'] = log_record['filename']
 
         log_record['pid'] = log_record['process']
         log_record['v'] = 0

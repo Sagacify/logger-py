@@ -12,22 +12,25 @@ except ImportError:
     from io import StringIO
 
 sys.path.append('../sagalogger')
+
+
 import sagalogger
 
 
 class TestJsonLogger(unittest.TestCase):
     def setUp(self):
+        self.logger = sagalogger.get_logger('sagalogger-test')
         self.logBuffer = StringIO()
 
-        self.logger = logging.getLogger('sagalogger-test')
-        self.logger.setLevel(logging.DEBUG)
+        # self.logger = logging.getLogger('sagalogger-test')
+        # self.logger.setLevel(logging.DEBUG)
 
         self.logHandler = logging.StreamHandler(self.logBuffer)
         self.logger.addHandler(self.logHandler)
 
     def testDefaultFormat(self):
-        fr = sagalogger.SagaFormatter()
-        self.logHandler.setFormatter(fr)
+        # fr = sagalogger.SagaFormatter()
+        # self.logHandler.setFormatter(fr)
 
         msg = "testing logging format"
         self.logger.info(msg)
@@ -45,8 +48,8 @@ class TestJsonLogger(unittest.TestCase):
             'time',
             'v'
         ]
-        fr = sagalogger.SagaFormatter()
-        self.logHandler.setFormatter(fr)
+        # fr = sagalogger.SagaFormatter()
+        # self.logHandler.setFormatter(fr)
 
         msg = "testing sagalogger"
         self.logger.info(msg)
@@ -57,9 +60,9 @@ class TestJsonLogger(unittest.TestCase):
             self.assertIn(supported_key, log_json)
 
     def testLogADict(self):
-        fr = sagalogger.SagaFormatter()
+        # fr = sagalogger.SagaFormatter()
 
-        self.logHandler.setFormatter(fr)
+        # self.logHandler.setFormatter(fr)
 
         msg = {
             "the": "dict",
@@ -78,9 +81,9 @@ class TestJsonLogger(unittest.TestCase):
         self.assertEqual(logJson["msg"], "")
 
     def testLogExtra(self):
-        fr = sagalogger.SagaFormatter()
+        # fr = sagalogger.SagaFormatter()
 
-        self.logHandler.setFormatter(fr)
+        # self.logHandler.setFormatter(fr)
 
         extra = {
             "the": "dict",
@@ -91,7 +94,7 @@ class TestJsonLogger(unittest.TestCase):
             }
         }
 
-        self.logger.info("yo", extra=extra)
+        self.logger.info("yo", data=extra)
         logJson = json.loads(self.logBuffer.getvalue())
 
         self.assertEqual(logJson.get("the"), extra["the"])
@@ -101,9 +104,9 @@ class TestJsonLogger(unittest.TestCase):
         self.assertEqual(logJson["msg"], "yo")
 
     def testJsonDefaultEncoder(self):
-        fr = sagalogger.SagaFormatter()
+        # fr = sagalogger.SagaFormatter()
 
-        self.logHandler.setFormatter(fr)
+        # self.logHandler.setFormatter(fr)
 
         msg = {
             "dateone": datetime.datetime(1999, 12, 31, 23, 59),
@@ -132,19 +135,30 @@ class TestJsonLogger(unittest.TestCase):
         logJson = json.loads(self.logBuffer.getvalue())
         self.assertEqual(logJson.get("addit"), "added")
 
-    def testExcInfo(self):
-        fr = sagalogger.SagaFormatter()
+    # def testExcInfo(self):
+    #     # fr = sagalogger.SagaFormatter()
 
-        self.logHandler.setFormatter(fr)
-        try:
-            raise Exception('letest')
-        except Exception:
-            self.logger.exception("yo")
+    #     # self.logHandler.setFormatter(fr)
+    #     try:
+    #         raise Exception('letest')
+    #     except Exception:
+    #         self.logger.exception("yo")
 
-            expected_value = traceback.format_exc()
-            # Formatter removes trailing new line
-            if expected_value.endswith('\n'):
-                expected_value = expected_value[:-1]
+    #         expected_value = traceback.format_exc()
+    #         # Formatter removes trailing new line
+    #         if expected_value.endswith('\n'):
+    #             expected_value = expected_value[:-1]
 
-        logJson = json.loads(self.logBuffer.getvalue())
-        self.assertEqual(logJson.get("exc_info"), expected_value)
+    #     logJson = json.loads(self.logBuffer.getvalue())
+    #     self.assertEqual(logJson.get("exc_info"), expected_value)
+
+    def testSagaLoggerFormat(self):
+        # fr = sagalogger.SagaFormatter()
+        # self.logHandler.setFormatter(fr)
+
+        self.logger.info('Hello', data={}, meta={"url":"https://www.engadget.com/2016/10/04/google-pixel-daydream-uk-pricing/"})
+        self.logger.info('World', data={}, meta={"url":"https://www.engadget.com/2016/10/04/google-pixel-daydream-uk-pricing/"})
+        # logJson = json.loads(self.logBuffer.getvalue())
+        # print(logJson)
+        self.assertEqual(True, False)
+

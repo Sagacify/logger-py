@@ -4,8 +4,14 @@ import os
 import sys
 
 
-def get_logger(module):
+def get_logger(module, version=None):
     logger = logging.getLogger(module)
+    # This might have to be set outside of this module, and only in projects
+    logHandler = logging.StreamHandler(stream=sys.stdout)
+    formatter = SagaFormatter()
+    logHandler.setFormatter(formatter)
+    logger.addHandler(logHandler)
+    logger.setLevel(get_log_level())
 
     def log(level, event, data=None, meta=None):
         if not isinstance(event, str):
@@ -19,7 +25,9 @@ def get_logger(module):
             {
                 "event": event,
                 "data": data,
-                "meta": meta
+                "meta": meta,
+                "module": logger.findCaller()[0],
+                "version": version
             }
         )
 
@@ -50,9 +58,3 @@ def get_log_level():
     else:
         return LOG_LEVELS[log_level.lower()]
 
-rootLogger = logging.getLogger()
-logHandler = logging.StreamHandler(stream=sys.stdout)
-formatter = SagaFormatter()
-logHandler.setFormatter(formatter)
-rootLogger.addHandler(logHandler)
-rootLogger.setLevel(get_log_level())
