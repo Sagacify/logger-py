@@ -5,6 +5,7 @@ try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
 except(IOError, ImportError, OSError):
+    print("WARN: README conversion to rst skipped.")
     long_description = open('README.md').read()
 
 setup(

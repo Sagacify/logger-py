@@ -10,7 +10,7 @@ except ImportError:
     # Python 3 Support
     from io import StringIO
 
-import sagalogger
+import src as sagalogger
 
 
 class TestJsonLogger(unittest.TestCase):
