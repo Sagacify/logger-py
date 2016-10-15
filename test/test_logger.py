@@ -1,7 +1,6 @@
 import datetime
 import json
 import logging
-import sys
 import traceback
 import unittest
 
@@ -11,7 +10,6 @@ except ImportError:
     # Python 3 Support
     from io import StringIO
 
-sys.path.append('../sagalogger')
 import sagalogger
 
 

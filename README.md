@@ -38,5 +38,5 @@ pip install -r dev-requirements.txt
 Then run nose:
 
 ```
-nosetests tests
+nosetests test
 ```
