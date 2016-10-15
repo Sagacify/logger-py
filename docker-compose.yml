@@ -1,6 +1,6 @@
 py:
   build: .
-  command: pytest-watch -- --cov=src --cov-report xml:coverage/cov.xml
+  command: pytest-watch -- --cov=src --cov-report html:coverage/html
   volumes:
     - ./coverage:/var/www/coverage
     - ./src:/var/www/src
