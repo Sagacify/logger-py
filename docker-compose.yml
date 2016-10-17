@@ -1,0 +1,9 @@
+py:
+  build: .
+  command: pytest-watch -- --cov=src --cov-report html:coverage/html
+  volumes:
+    - ./coverage:/var/www/coverage
+    - ./src:/var/www/src
+    - ./test:/var/www/test
+    - ./setup.py:/var/www/setup.py
+    - ./tox.ini:/var/www/tox.ini

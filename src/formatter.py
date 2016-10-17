@@ -61,7 +61,7 @@ def get_json_handler(datefmt):
 
             return tb.strip()
         elif isinstance(obj, Exception):
-            return "Exception: %s" % str(obj)
+            return 'Exception: %s' % str(obj)
 
         return str(obj)
 
@@ -108,11 +108,11 @@ class SagaFormatter(logging.Formatter):
         self.app_name = sys.argv[0].split(os.sep)[-1]
 
         def log_format(x):
-            return ["%({0:s})".format(i) for i in x]
+            return ['%({0:s})'.format(i) for i in x]
         logging.Formatter.__init__(
             self,
             ' '.join(log_format(self._required_fields)),
-            "%Y-%m-%dT%H:%M:%SZ",
+            '%Y-%m-%dT%H:%M:%SZ',
             *args,
             **kwargs
         )
@@ -127,13 +127,6 @@ class SagaFormatter(logging.Formatter):
 
         log_record.update(message_dict)
         merge_record_extra(record, log_record, reserved=self._skip_fields)
-
-    def process_log_record(self, log_record):
-        """
-        Override this method to implement custom logic
-        on the possibly ordered dictionary.
-        """
-        return log_record
 
     def jsonify_log_record(self, log_record):
         """
@@ -153,7 +146,7 @@ class SagaFormatter(logging.Formatter):
         else:
             record.message = record.getMessage()
         # only format time if needed
-        if "asctime" in self._required_fields:
+        if 'asctime' in self._required_fields:
             record.time = self.formatTime(record, self.datefmt)
 
         # Display formatted exception, but allow overriding it in the
@@ -172,11 +165,11 @@ class SagaFormatter(logging.Formatter):
         return self.jsonify_log_record(log_record)
 
     def process_log_record(self, log_record):
-        """
-        Bunyanize log_record:
-            - Renames python's standard names by bunyan's.
-            - Add hostname and version (v).
-            - Normalize level (+10).
+        """Bunyanize log_record
+
+            - Renames python's standard names by bunyan's
+            - Add hostname and version (v)
+            - Normalize level (+10)
         """
         # Add hostname
         log_record['hostname'] = socket.gethostname()
@@ -185,7 +178,7 @@ class SagaFormatter(logging.Formatter):
         if 'message' in log_record and log_record['message']:
             log_record['msg'] = log_record['message']
         else:
-            log_record['msg'] = ""
+            log_record['msg'] = ''
 
         if 'name' in log_record:
             log_record['module'] = log_record['name']

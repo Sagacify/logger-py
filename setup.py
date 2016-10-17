@@ -1,20 +1,22 @@
-from distutils.core import setup
-
+from setuptools import setup
 from io import open
+
 try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
 except(IOError, ImportError, OSError):
+    print('WARN: README conversion to rst skipped.')
     long_description = open('README.md').read()
 
 setup(
-  name='sagalogger',
-  version='0.2.1',
-  author='Augustin Borsu',
-  author_email='dev@sagacify.com',
-  packages=['sagalogger'],
-  license='LICENSE',
-  description='Saga python logger',
-  url='https://www.github.com/Sagacify/logger-py',
-  long_description=long_description
+    name='sagalogger',
+    packages=['sagalogger'],
+    package_dir={'sagalogger': 'src'},
+    version='0.2.1',
+    author='Sagacify',
+    author_email='dev@sagacify.com',
+    license='LICENSE',
+    description='Saga python logger',
+    url='https://www.github.com/Sagacify/logger-py',
+    long_description=long_description
 )

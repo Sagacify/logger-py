@@ -11,15 +11,15 @@ def get_logger(module):
         if not isinstance(event, str):
             event = event.__repr__()
         if (data is not None and isinstance(data, str)):
-            data = {"message": data}
+            data = {'message': data}
         if (meta is not None and isinstance(meta, str)):
-            meta = {"message": meta}
+            meta = {'message': meta}
         logger.log(
             level,
             {
-                "event": event,
-                "data": data,
-                "meta": meta
+                'event': event,
+                'data': data,
+                'meta': meta
             }
         )
 
@@ -34,19 +34,19 @@ def get_logger(module):
 # Bunyan log levels are slightly different cfr:
 # https://docs.python.org/2/library/logging.html#levels
 LOG_LEVELS = {
-    "fatal": 50,
-    "error": 40,
-    "warn": 30,
-    "info": 20,
-    "debug": 10,
-    "trace": 0,
+    'fatal': 50,
+    'error': 40,
+    'warn': 30,
+    'info': 20,
+    'debug': 10,
+    'trace': 0,
 }
 
 
 def get_log_level():
-    log_level = os.environ.get("LOG_LEVEL")
+    log_level = os.environ.get('LOG_LEVEL')
     if log_level is None:
-        return LOG_LEVELS["info"]
+        return LOG_LEVELS['info']
     else:
         return LOG_LEVELS[log_level.lower()]
 

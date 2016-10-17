@@ -3,7 +3,7 @@ Json logger compatible with [logger](https://github.com/Sagacify/logger)
 
 # Get the code
 ```sh
-git clone https://github.com/Sagacify/logger-python
+git clone https://github.com/Sagacify/logger-py
 ```
 
 # Install
@@ -28,15 +28,18 @@ All logger functions (trace, debug, info, warn, error, fatal) expect 1 -> 3  arg
  - meta: Any meta information that could be of interest.
 
 
-# Testing
-First, install `dev-requirements`
-
+# Developping
+To run the tests and watch the sources for any changes, run:
 ```sh
-pip install -r dev-requirements.txt
+docker-compose up
 ```
 
-Then run nose:
-
+To run the style-tests, run:
+```sh
+docker-compose run py flake8
 ```
-nosetests tests
+
+To output coverage information in html, run:
+```sh
+docker-compose run py pytest --cov=src --cov-report html:coverage/html
 ```

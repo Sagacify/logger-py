@@ -1,7 +1,6 @@
 import datetime
 import json
 import logging
-import sys
 import traceback
 import unittest
 
@@ -11,8 +10,7 @@ except ImportError:
     # Python 3 Support
     from io import StringIO
 
-sys.path.append('../sagalogger')
-import sagalogger
+import src as sagalogger
 
 
 class TestJsonLogger(unittest.TestCase):
@@ -29,11 +27,11 @@ class TestJsonLogger(unittest.TestCase):
         fr = sagalogger.SagaFormatter()
         self.logHandler.setFormatter(fr)
 
-        msg = "testing logging format"
+        msg = 'testing logging format'
         self.logger.info(msg)
         logJson = json.loads(self.logBuffer.getvalue())
 
-        self.assertEqual(logJson["msg"], msg)
+        self.assertEqual(logJson['msg'], msg)
 
     def testFormatKeys(self):
         supported_keys = [
@@ -48,7 +46,7 @@ class TestJsonLogger(unittest.TestCase):
         fr = sagalogger.SagaFormatter()
         self.logHandler.setFormatter(fr)
 
-        msg = "testing sagalogger"
+        msg = 'testing sagalogger'
         self.logger.info(msg)
         log_msg = self.logBuffer.getvalue()
         log_json = json.loads(log_msg)
@@ -62,20 +60,20 @@ class TestJsonLogger(unittest.TestCase):
         self.logHandler.setFormatter(fr)
 
         msg = {
-            "the": "dict",
-            "has": 1,
+            'the': 'dict',
+            'has': 1,
             5: 1,
-            "and": {"nested": "properties"}
+            'and': {'nested': 'properties'}
         }
 
         self.logger.info(msg)
         logJson = json.loads(self.logBuffer.getvalue())
 
-        self.assertEqual(logJson.get("the"), msg["the"])
-        self.assertEqual(logJson.get("has"), msg["has"])
-        self.assertEqual(logJson.get("5"), msg[5])
-        self.assertEqual(logJson.get("and"), msg["and"])
-        self.assertEqual(logJson["msg"], "")
+        self.assertEqual(logJson.get('the'), msg['the'])
+        self.assertEqual(logJson.get('has'), msg['has'])
+        self.assertEqual(logJson.get('5'), msg[5])
+        self.assertEqual(logJson.get('and'), msg['and'])
+        self.assertEqual(logJson['msg'], '')
 
     def testLogExtra(self):
         fr = sagalogger.SagaFormatter()
@@ -83,22 +81,22 @@ class TestJsonLogger(unittest.TestCase):
         self.logHandler.setFormatter(fr)
 
         extra = {
-            "the": "dict",
-            "has": 1,
+            'the': 'dict',
+            'has': 1,
             5: 1,
-            "and": {
-                "nested": "properties"
+            'and': {
+                'nested': 'properties'
             }
         }
 
-        self.logger.info("yo", extra=extra)
+        self.logger.info('yo', extra=extra)
         logJson = json.loads(self.logBuffer.getvalue())
 
-        self.assertEqual(logJson.get("the"), extra["the"])
-        self.assertEqual(logJson.get("has"), extra["has"])
-        self.assertEqual(logJson.get("5"), extra[5])
-        self.assertEqual(logJson.get("and"), extra["and"])
-        self.assertEqual(logJson["msg"], "yo")
+        self.assertEqual(logJson.get('the'), extra['the'])
+        self.assertEqual(logJson.get('has'), extra['has'])
+        self.assertEqual(logJson.get('5'), extra[5])
+        self.assertEqual(logJson.get('and'), extra['and'])
+        self.assertEqual(logJson['msg'], 'yo')
 
     def testJsonDefaultEncoder(self):
         fr = sagalogger.SagaFormatter()
@@ -106,31 +104,31 @@ class TestJsonLogger(unittest.TestCase):
         self.logHandler.setFormatter(fr)
 
         msg = {
-            "dateone": datetime.datetime(1999, 12, 31, 23, 59),
-            "datetwo": datetime.datetime(1900, 1, 1)
+            'dateone': datetime.datetime(1999, 12, 31, 23, 59),
+            'datetwo': datetime.datetime(1900, 1, 1)
         }
 
         self.logger.info(msg)
         logJson = json.loads(self.logBuffer.getvalue())
 
-        self.assertEqual(logJson.get("dateone"), "1999-12-31T23:59:00Z")
-        self.assertEqual(logJson.get("datetwo"), "1900-01-01T00:00:00Z")
+        self.assertEqual(logJson.get('dateone'), '1999-12-31T23:59:00Z')
+        self.assertEqual(logJson.get('datetwo'), '1900-01-01T00:00:00Z')
 
     def testJsonCustomLogicAddsField(self):
 
         class LeSagaFormatter(sagalogger.SagaFormatter):
             def process_log_record(self, log_record):
-                log_record["addit"] = "added"
+                log_record['addit'] = 'added'
                 return super(
                     LeSagaFormatter,
                     self
                 ).process_log_record(log_record)
 
         self.logHandler.setFormatter(LeSagaFormatter())
-        self.logger.info("yo")
+        self.logger.info('yo')
 
         logJson = json.loads(self.logBuffer.getvalue())
-        self.assertEqual(logJson.get("addit"), "added")
+        self.assertEqual(logJson.get('addit'), 'added')
 
     def testExcInfo(self):
         fr = sagalogger.SagaFormatter()
@@ -139,7 +137,7 @@ class TestJsonLogger(unittest.TestCase):
         try:
             raise Exception('letest')
         except Exception:
-            self.logger.exception("yo")
+            self.logger.exception('yo')
 
             expected_value = traceback.format_exc()
             # Formatter removes trailing new line
@@ -147,4 +145,4 @@ class TestJsonLogger(unittest.TestCase):
                 expected_value = expected_value[:-1]
 
         logJson = json.loads(self.logBuffer.getvalue())
-        self.assertEqual(logJson.get("exc_info"), expected_value)
+        self.assertEqual(logJson.get('exc_info'), expected_value)

@@ -1,0 +1,5 @@
+pytest
+flake8
+flake8-quotes
+pytest-watch
+pytest-cov
