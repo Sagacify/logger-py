@@ -1,12 +1,13 @@
 from setuptools import setup
 from io import open
+import os
 
-try:
-    import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
-except(IOError, ImportError, OSError):
-    print('WARN: README conversion to rst skipped.')
-    long_description = open('README.md').read()
+if not os.path.isfile('README.rst') and os.path.isfile('README.md'):
+    with open('README.rst', 'w', encoding='utf-8') as readme:
+        import pypandoc
+        readme.write(pypandoc.convert('README.md', 'rst'))
+
+long_description = open('README.rst').read()
 
 setup(
     name='sagalogger',
