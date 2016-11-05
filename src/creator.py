@@ -2,12 +2,43 @@ from .formatter import SagaFormatter
 import logging
 import os
 import sys
+from functools import partial
+
+# Bunyan log levels are slightly different cfr:
+# https://docs.python.org/2/library/logging.html#levels
+LOG_LEVELS = {
+    'fatal': 50,
+    'error': 40,
+    'warn': 30,
+    'info': 20,
+    'debug': 10,
+    'trace': 0,
+}
+
+log_handler = logging.StreamHandler(stream=sys.stdout)
+formatter = SagaFormatter()
+log_handler.setFormatter(formatter)
+
+log_level_name = os.environ.get('LOG_LEVEL')
+
+if log_level_name is None:
+    log_level = LOG_LEVELS['info']
+else:
+    log_level = LOG_LEVELS[log_level.lower()]
+
+if log_level == LOG_LEVELS['trace']:
+    rootLogger = logging.getLogger()
+    rootLogger.addHandler(log_handler)
+    rootLogger.setLevel(log_level)
 
 
 def get_logger(module):
     logger = logging.getLogger(module)
+    if log_level > 0:
+        logger.addHandler(log_handler)
+        logger.setLevel(log_level)
 
-    def log(level, event, data=None, meta=None):
+    def log(event, data=None, meta=None, level=0):
         if not isinstance(event, str):
             event = event.__repr__()
         if (data is not None and isinstance(data, str)):
@@ -24,35 +55,6 @@ def get_logger(module):
         )
 
     for name, level in LOG_LEVELS.items():
-        logger.__setattr__(
-            name,
-            lambda event, data=None, meta=None, level=level:
-                log(level, event, data, meta))
+        logger.__setattr__(name, partial(log, level=level))
 
     return logger
-
-# Bunyan log levels are slightly different cfr:
-# https://docs.python.org/2/library/logging.html#levels
-LOG_LEVELS = {
-    'fatal': 50,
-    'error': 40,
-    'warn': 30,
-    'info': 20,
-    'debug': 10,
-    'trace': 0,
-}
-
-
-def get_log_level():
-    log_level = os.environ.get('LOG_LEVEL')
-    if log_level is None:
-        return LOG_LEVELS['info']
-    else:
-        return LOG_LEVELS[log_level.lower()]
-
-rootLogger = logging.getLogger()
-logHandler = logging.StreamHandler(stream=sys.stdout)
-formatter = SagaFormatter()
-logHandler.setFormatter(formatter)
-rootLogger.addHandler(logHandler)
-rootLogger.setLevel(get_log_level())
