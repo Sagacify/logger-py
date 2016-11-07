@@ -1,8 +1,8 @@
-from .formatter import SagaFormatter
 import logging
 import os
 import sys
 from functools import partial
+from .formatter import SagaFormatter
 
 # Bunyan log levels are slightly different cfr:
 # https://docs.python.org/2/library/logging.html#levels
@@ -15,35 +15,34 @@ LOG_LEVELS = {
     'trace': 0,
 }
 
-log_handler = logging.StreamHandler(stream=sys.stdout)
-formatter = SagaFormatter()
-log_handler.setFormatter(formatter)
+LOG_HANDLER = logging.StreamHandler(stream=sys.stdout)
+FORMATTER = SagaFormatter()
+LOG_HANDLER.setFormatter(FORMATTER)
 
-log_level_name = os.environ.get('LOG_LEVEL')
+LOG_LEVEL_NAME = os.environ.get('LOG_LEVEL')
 
-if log_level_name is None:
-    log_level = LOG_LEVELS['info']
+if LOG_LEVEL_NAME is None:
+    LOG_LEVEL = LOG_LEVELS['info']
 else:
-    log_level = LOG_LEVELS[log_level.lower()]
+    LOG_LEVEL = LOG_LEVELS[LOG_LEVEL_NAME.lower()]
 
-if log_level == LOG_LEVELS['trace']:
-    rootLogger = logging.getLogger()
-    rootLogger.addHandler(log_handler)
-    rootLogger.setLevel(log_level)
+if LOG_LEVEL == LOG_LEVELS['trace']:
+    ROOT_LOGGER = logging.getLogger()
+    ROOT_LOGGER.addHandler(LOG_HANDLER)
+    ROOT_LOGGER.setLevel(LOG_LEVEL)
 
 
 def get_logger(module):
     logger = logging.getLogger(module)
-    if log_level > 0:
-        logger.addHandler(log_handler)
-        logger.setLevel(log_level)
+    logger.addHandler(LOG_HANDLER)
+    logger.setLevel(LOG_LEVEL)
 
     def log(event, data=None, meta=None, level=0):
         if not isinstance(event, str):
             event = event.__repr__()
-        if (data is not None and isinstance(data, str)):
+        if data is not None and isinstance(data, str):
             data = {'message': data}
-        if (meta is not None and isinstance(meta, str)):
+        if meta is not None and isinstance(meta, str):
             meta = {'message': meta}
         logger.log(
             level,
