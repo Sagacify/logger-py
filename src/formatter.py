@@ -68,6 +68,27 @@ def get_json_handler(datefmt):
     return handler
 
 
+def get_name_from_args():
+    return (sys.argv[0] or sys.executable).split(os.sep)[-1]
+
+
+def get_app_name_version():
+    main_module = sys.modules['__main__']
+
+    # If importing from jupyter hub or cli.
+    if main_module.__package__ is None:
+        return get_name_from_args(), sys.version.split(' ')[0]
+
+    app_package = sys.modules[main_module.__package__]
+    try:
+        app_name = app_package.__title__
+        app_version = app_package.__version__
+    except AttributeError:
+        print('FATAL: could not access package info.')
+        sys.exit(-1)
+    return app_name, app_version
+
+
 class SagaFormatter(logging.Formatter):
     """
     Saga Formatter.
@@ -105,7 +126,7 @@ class SagaFormatter(logging.Formatter):
             'thread',
             'threadName',
         ]
-        self.app_name = sys.argv[0].split(os.sep)[-1]
+        self.app_name, self.app_version = get_app_name_version()
 
         def log_format(x):
             return ['%({0:s})'.format(i) for i in x]
@@ -184,6 +205,7 @@ class SagaFormatter(logging.Formatter):
             log_record['module'] = log_record['name']
 
         log_record['name'] = self.app_name
+        log_record['version'] = self.app_version
 
         log_record['pid'] = log_record['process']
         log_record['v'] = 0
