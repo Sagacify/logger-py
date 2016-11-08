@@ -2,22 +2,34 @@ from setuptools import setup
 from io import open
 import os
 
-if not os.path.isfile('README.rst') and os.path.isfile('README.md'):
-    with open('README.rst', 'w', encoding='utf-8') as readme:
-        import pypandoc
-        readme.write(pypandoc.convert('README.md', 'rst'))
+root = os.path.abspath(os.path.dirname(__file__))
 
-long_description = open('README.rst').read()
+
+with open(os.path.join(root, 'src', '__about__.py'), encoding='utf8') as f:
+    about = {}
+    exec(f.read(), about)
+
+
+with open(os.path.join(root, 'README.rst'), 'w', encoding='utf-8') as readme:
+    import pypandoc
+    readme.write(pypandoc.convert(os.path.join(root, 'README.md'), 'rst'))
+
+
+long_description = open(
+    os.path.join(root, 'README.rst'),
+    encoding='utf-8'
+).read()
+
 
 setup(
-    name='sagalogger',
-    packages=['sagalogger'],
-    package_dir={'sagalogger': 'src'},
-    version='0.2.1',
-    author='Sagacify',
-    author_email='dev@sagacify.com',
-    license='LICENSE',
-    description='Saga python logger',
-    url='https://www.github.com/Sagacify/logger-py',
-    long_description=long_description
+    name=about['__title__'],
+    packages=[about['__title__']],
+    package_dir={about['__title__']: 'src'},
+    description=about['__summary__'],
+    long_description=long_description,
+    author=about['__author__'],
+    author_email=about['__email__'],
+    version=about['__version__'],
+    url=about['__uri__'],
+    license=about['__license__']
 )

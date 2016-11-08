@@ -1,35 +1,8 @@
-from .formatter import SagaFormatter
 import logging
 import os
 import sys
-
-
-def get_logger(module):
-    logger = logging.getLogger(module)
-
-    def log(level, event, data=None, meta=None):
-        if not isinstance(event, str):
-            event = event.__repr__()
-        if (data is not None and isinstance(data, str)):
-            data = {'message': data}
-        if (meta is not None and isinstance(meta, str)):
-            meta = {'message': meta}
-        logger.log(
-            level,
-            {
-                'event': event,
-                'data': data,
-                'meta': meta
-            }
-        )
-
-    for name, level in LOG_LEVELS.items():
-        logger.__setattr__(
-            name,
-            lambda event, data=None, meta=None, level=level:
-                log(level, event, data, meta))
-
-    return logger
+from functools import partial
+from .formatter import SagaFormatter
 
 # Bunyan log levels are slightly different cfr:
 # https://docs.python.org/2/library/logging.html#levels
@@ -42,17 +15,45 @@ LOG_LEVELS = {
     'trace': 0,
 }
 
+LOG_HANDLER = logging.StreamHandler(stream=sys.stdout)
+FORMATTER = SagaFormatter()
+LOG_HANDLER.setFormatter(FORMATTER)
 
-def get_log_level():
-    log_level = os.environ.get('LOG_LEVEL')
-    if log_level is None:
-        return LOG_LEVELS['info']
-    else:
-        return LOG_LEVELS[log_level.lower()]
+LOG_LEVEL_NAME = os.environ.get('LOG_LEVEL')
 
-rootLogger = logging.getLogger()
-logHandler = logging.StreamHandler(stream=sys.stdout)
-formatter = SagaFormatter()
-logHandler.setFormatter(formatter)
-rootLogger.addHandler(logHandler)
-rootLogger.setLevel(get_log_level())
+if LOG_LEVEL_NAME is None:
+    LOG_LEVEL = LOG_LEVELS['info']
+else:
+    LOG_LEVEL = LOG_LEVELS[LOG_LEVEL_NAME.lower()]
+
+if LOG_LEVEL == LOG_LEVELS['trace']:
+    ROOT_LOGGER = logging.getLogger()
+    ROOT_LOGGER.addHandler(LOG_HANDLER)
+    ROOT_LOGGER.setLevel(LOG_LEVEL)
+
+
+def get_logger(module):
+    logger = logging.getLogger(module)
+    logger.addHandler(LOG_HANDLER)
+    logger.setLevel(LOG_LEVEL)
+
+    def log(event, data=None, meta=None, level=0):
+        if not isinstance(event, str):
+            event = event.__repr__()
+        if data is not None and isinstance(data, str):
+            data = {'message': data}
+        if meta is not None and isinstance(meta, str):
+            meta = {'message': meta}
+        logger.log(
+            level,
+            {
+                'event': event,
+                'data': data,
+                'meta': meta
+            }
+        )
+
+    for name, level in LOG_LEVELS.items():
+        logger.__setattr__(name, partial(log, level=level))
+
+    return logger

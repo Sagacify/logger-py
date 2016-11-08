@@ -1,199 +1,96 @@
 """
-Bunyan Formatter.
+SagaFormatter
 
-Provides logging compatibility with Bunyan standard and enceforth CLI.
+Ensures logs are formatted as we want them.
+cfr: https://github.com/sagacify/logger
 """
 import datetime
-import json
-import logging
-import socket
-import traceback
 import os
+import socket
 import sys
-
-from inspect import istraceback
-
-# Support order in python 2.7 and 3
-try:
-    from collections import OrderedDict
-except ImportError:
-    pass
+import time
+import json
 
 
-def object_startswith(key, value):
-    return hasattr(key, 'startswith') and key.startswith(value)
+def extra_serializer(obj):
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat() + 'Z'
+    elif isinstance(obj, datetime.date):
+        return obj.isoformat()
+    elif isinstance(obj, datetime.time):
+        return obj.strftime('%H:%M')
+    else:
+        raise TypeError(type(obj))
 
 
-def merge_record_extra(record, target, reserved=[]):
+def get_name_from_args():
+    return (sys.argv[0] or sys.executable).split(os.sep)[-1]
+
+
+def get_app_name_version():
+    main_module = sys.modules['__main__']
+
+    # If importing from jupyter hub or cli.
+    if main_module.__package__ is None:
+        return get_name_from_args(), sys.version.split(' ')[0]
+
+    app_package = sys.modules[main_module.__package__]
+    try:
+        app_name = app_package.__title__
+        app_version = app_package.__version__
+    except AttributeError:
+        print('FATAL: could not access package info.')
+        sys.exit(-1)
+    return app_name, app_version
+
+
+def format_time(record):
+    """Format time to ISO 8601.
+
+    https://en.wikipedia.org/wiki/ISO_8601
     """
-    Merges extra attributes from LogRecord object into target dictionary.
-
-    :param record: logging.LogRecord
-    :param target: dict to update
-    :param reserved: dict or list with reserved keys to skip
-    """
-    new_values = {
-        key: value
-        for key, value in record.__dict__.items()
-        if (key not in reserved and not object_startswith(key, '_'))
-    }
-
-    target.update(new_values)
-
-    return target
+    utc_time = time.gmtime(record.created)
+    time_string = time.strftime('%Y-%m-%d %H:%M:%S', utc_time)
+    return '%s.%03dZ' % (time_string, record.msecs)
 
 
-def get_json_handler(datefmt):
-    def handler(obj):
-        '''Prints dates in ISO format'''
-        if isinstance(obj, datetime.datetime):
-            if obj.year < 1900:
-                # strftime do not work with date < 1900
-                return obj.isoformat()
-
-            return obj.strftime(datefmt or '%Y-%m-%dT%H:%M')
-        elif isinstance(obj, datetime.date):
-            return obj.isoformat()
-        elif isinstance(obj, datetime.time):
-            return obj.strftime('%H:%M')
-        elif istraceback(obj):
-            tb = ''.join(traceback.format_tb(obj))
-
-            return tb.strip()
-        elif isinstance(obj, Exception):
-            return 'Exception: %s' % str(obj)
-
-        return str(obj)
-
-    return handler
-
-
-class SagaFormatter(logging.Formatter):
+class SagaFormatter(object):
     """
     Saga Formatter.
 
-    Implements a logging Formatter by extending jsonlogger.JsonFormatter
-    to imitate saga-logger.js (based on Bunyan)
+    Formats mesages coming from a sagalogger
     """
-    def __init__(self, *args, **kwargs):
-        """
-        Defined default log format.
-        """
-        self._required_fields = [
-            'asctime',
-            'exc_info',
-            'levelno',
-            'message',
-            'name',
-            'process',
-        ]
-        self._skip_fields = self._required_fields[:]
-        self._skip_fields += [
-            'args',
-            'created',
-            'exc_text',
-            'filename',
-            'funcName',
-            'levelname',
-            'lineno',
-            'module',
-            'msecs',
-            'pathname',
-            'processName',
-            'relativeCreated',
-            'stack_info',
-            'thread',
-            'threadName',
-        ]
-        self.app_name = sys.argv[0].split(os.sep)[-1]
 
-        def log_format(x):
-            return ['%({0:s})'.format(i) for i in x]
-        logging.Formatter.__init__(
-            self,
-            ' '.join(log_format(self._required_fields)),
-            '%Y-%m-%dT%H:%M:%SZ',
-            *args,
-            **kwargs
-        )
-        self.json_default = get_json_handler(self.datefmt)
-
-    def add_fields(self, log_record, record, message_dict):
-        """
-        Override this method to implement custom logic for adding fields.
-        """
-        for field in self._required_fields:
-            log_record[field] = record.__dict__.get(field)
-
-        log_record.update(message_dict)
-        merge_record_extra(record, log_record, reserved=self._skip_fields)
-
-    def jsonify_log_record(self, log_record):
-        """
-        Returns a json string of the log record.
-        """
-        return json.dumps(log_record, default=self.json_default)
+    def __init__(self):
+        self.app_name, self.app_version = get_app_name_version()
+        self.hostname = socket.gethostname()
 
     def format(self, record):
         """
         Formats a log record and serializes to json
         """
-        message_dict = {}
-
         if isinstance(record.msg, dict):
-            message_dict = record.msg
-            record.message = None
+            event = record.msg.get('event')
+            data = record.msg.get('data')
+            meta = record.msg.get('meta')
+            msg = ''
         else:
-            record.message = record.getMessage()
-        # only format time if needed
-        if 'asctime' in self._required_fields:
-            record.time = self.formatTime(record, self.datefmt)
+            msg = str(record.msg)
+            event = None
+            data = None
+            meta = None
 
-        # Display formatted exception, but allow overriding it in the
-        # user-supplied dict.
-        if record.exc_info and not message_dict.get('exc_info'):
-            message_dict['exc_info'] = self.formatException(record.exc_info)
-
-        try:
-            log_record = OrderedDict()
-        except NameError:
-            log_record = {}
-
-        self.add_fields(log_record, record, message_dict)
-        log_record = self.process_log_record(log_record)
-
-        return self.jsonify_log_record(log_record)
-
-    def process_log_record(self, log_record):
-        """Bunyanize log_record
-
-            - Renames python's standard names by bunyan's
-            - Add hostname and version (v)
-            - Normalize level (+10)
-        """
-        # Add hostname
-        log_record['hostname'] = socket.gethostname()
-        log_record['level'] = log_record['levelno'] + 10
-
-        if 'message' in log_record and log_record['message']:
-            log_record['msg'] = log_record['message']
-        else:
-            log_record['msg'] = ''
-
-        if 'name' in log_record:
-            log_record['module'] = log_record['name']
-
-        log_record['name'] = self.app_name
-
-        log_record['pid'] = log_record['process']
-        log_record['v'] = 0
-
-        if not log_record['exc_info']:
-            del log_record['exc_info']
-
-        del log_record['asctime']
-        del log_record['levelno']
-        del log_record['message']
-        del log_record['process']
-
-        return log_record
+        return json.dumps({
+            'name': self.app_name,
+            'version': self.app_version,
+            'module': record.name or record.module,
+            'time': format_time(record),
+            'v': 0,
+            'hostname': self.hostname,
+            'pid': record.process,
+            'level': record.levelno + 10,
+            'msg': msg,
+            'event': event,
+            'data': data,
+            'meta': meta
+            }, default=extra_serializer)
