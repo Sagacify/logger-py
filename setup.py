@@ -10,15 +10,14 @@ with open(os.path.join(root, 'src', '__about__.py'), encoding='utf8') as f:
     exec(f.read(), about)
 
 
-with open(os.path.join(root, 'README.rst'), 'w', encoding='utf-8') as readme:
-    import pypandoc
-    readme.write(pypandoc.convert(os.path.join(root, 'README.md'), 'rst'))
+rst_file = os.path.join(root, 'README.rst')
+if not os.path.isfile(rst_file):
+    with open(rst_file, 'w', encoding='utf-8') as readme:
+        import pypandoc
+        readme.write(pypandoc.convert(os.path.join(root, 'README.md'), 'rst'))
 
 
-long_description = open(
-    os.path.join(root, 'README.rst'),
-    encoding='utf-8'
-).read()
+long_description = open(rst_file, encoding='utf-8').read()
 
 
 setup(
