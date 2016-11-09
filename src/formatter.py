@@ -5,22 +5,40 @@ Ensures logs are formatted as we want them.
 cfr: https://github.com/sagacify/logger
 """
 import datetime
+import json
 import os
 import socket
 import sys
 import time
-import json
+import traceback
+
+
+def error_serializer(error):
+    """Serialize error as bunyan.
+
+    When in doubt, ask what would bunyan do?
+    https://github.com/trentm/node-bunyan/blob/master/lib/bunyan.js#L1141
+    """
+    trace = traceback.format_stack(error.__traceback__)
+    return {
+        'message': ' '.join(error.args),
+        'name': error.__class__.__name__,
+        'stack': [line for line in trace]
+    }
 
 
 def extra_serializer(obj):
     if isinstance(obj, datetime.datetime):
-        return obj.isoformat() + 'Z'
+        result = obj.isoformat() + 'Z'
     elif isinstance(obj, datetime.date):
-        return obj.isoformat()
+        result = obj.isoformat()
     elif isinstance(obj, datetime.time):
-        return obj.strftime('%H:%M')
+        result = obj.strftime('%H:%M')
+    elif isinstance(obj, BaseException):
+        result = error_serializer(obj)
     else:
-        raise TypeError(type(obj))
+        result = {'str': str(obj)}
+    return result
 
 
 def get_name_from_args():
