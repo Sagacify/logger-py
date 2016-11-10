@@ -66,7 +66,7 @@ class TestJsonLogger(unittest.TestCase):
         self.assertEqual(logJson.get('data'), msg['data'])
         self.assertEqual(logJson.get('meta'), msg['meta'])
 
-    def testJsonDefaultEncoder(self):
+    def testJsonDateEncoder(self):
         fr = sagalogger.SagaFormatter()
 
         self.logHandler.setFormatter(fr)
@@ -81,3 +81,18 @@ class TestJsonLogger(unittest.TestCase):
 
         self.assertEqual(logJson['data'].get('one'), '1999-12-31T23:59:00Z')
         self.assertEqual(logJson['data'].get('two'), '1900-01-01T00:00:00Z')
+
+    def testJsonErrorEncoder(self):
+        fr = sagalogger.SagaFormatter()
+
+        self.logHandler.setFormatter(fr)
+
+        data = Exception('The world is harsh!')
+
+        self.logger.info({'event': 'PROUT', 'data': data})
+        logJson = json.loads(self.logBuffer.getvalue())
+        print(logJson['data'])
+
+        self.assertEqual(logJson['data']['message'], 'The world is harsh!')
+        self.assertEqual(logJson['data']['name'], 'Exception')
+        self.assertIs(type(logJson['data']['stack']), list)
