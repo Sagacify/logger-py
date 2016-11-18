@@ -13,17 +13,24 @@ import time
 import traceback
 
 
-def error_serializer(error):
+def error_serializer(error, error_traceback=None):
     """Serialize error as bunyan.
 
     When in doubt, ask what would bunyan do?
     https://github.com/trentm/node-bunyan/blob/master/lib/bunyan.js#L1141
     """
-    trace = traceback.format_stack(error.__traceback__)
+    if error_traceback is not None:
+        trace = ''.join(traceback.format_tb(error_traceback, 15))
+    elif error.__traceback__ is not None:
+        trace = ''.join(traceback.format_tb(error.__traceback__, 15))
+    else:
+        # Exceptions that where never caught don't have a stack trace.
+        trace = ''
+
     return {
         'message': ' '.join(error.args),
         'name': error.__class__.__name__,
-        'stack': [line for line in trace]
+        'stack': trace
     }
 
 
