@@ -56,4 +56,9 @@ def get_logger(module):
     for name, level in LOG_LEVELS.items():
         logger.__setattr__(name, partial(log, level=level))
 
+    def warning_attr(*args, **kwargs):
+        raise AttributeError('SagaLogger uses warn instead of warning.')
+
+    logger.__setattr__('warning', warning_attr)
+
     return logger
