@@ -10,7 +10,7 @@ __title__ = 'sagalogger'
 __summary__ = 'A json log formatter.'
 __uri__ = 'https://www.github.com/Sagacify/logger-py'
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 
 __author__ = 'Sagacify'
