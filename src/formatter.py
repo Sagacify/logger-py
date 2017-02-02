@@ -28,7 +28,7 @@ def error_serializer(error, error_traceback=None):
         trace = ''
 
     return {
-        'message': ' '.join(error.args),
+        'message': ' '.join(str(arg) for arg in error.args),
         'name': error.__class__.__name__,
         'stack': trace
     }
