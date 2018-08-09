@@ -1,0 +1,27 @@
+version: 2
+jobs:
+  build:
+    working_directory: /app
+    docker:
+      - image: sagacify/docker-circle-ci2.0
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Remove-volumes
+          command: |
+            wget https://raw.githubusercontent.com/Sagacify/ci-tools/master/remove-volumes.sh
+            chmod +x ./remove-volumes.sh
+            ./remove-volumes.sh > docker-compose.tests.yml
+      - run:
+          name: Run tests
+          command: |
+            docker-compose -f docker-compose.tests.yml run py pytest --cov=src --cov-report html:coverage/html
+      - run:
+          name: Run sonar tests
+          command: |
+            wget https://raw.githubusercontent.com/Sagacify/ci-tools/master/run-sonar.sh
+            chmod +x ./run-sonar.sh
+            bash ./run-sonar.sh check
+            bash ./run-sonar.sh install
+            bash ./run-sonar.sh run

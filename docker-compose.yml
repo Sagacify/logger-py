@@ -6,4 +6,3 @@ py:
     - ./src:/var/www/src
     - ./test:/var/www/test
     - ./setup.py:/var/www/setup.py
-    - ./tox.ini:/var/www/tox.ini
