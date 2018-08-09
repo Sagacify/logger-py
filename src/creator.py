@@ -36,6 +36,7 @@ def get_logger(module):
     logger = logging.getLogger(module)
     logger.addHandler(LOG_HANDLER)
     logger.setLevel(LOG_LEVEL)
+    logger.propagate = False
 
     def log(event, data=None, meta=None, level=0, *args, **kwargs):
         if not isinstance(event, str):
