@@ -25,3 +25,9 @@ jobs:
             bash ./run-sonar.sh check
             bash ./run-sonar.sh install
             bash ./run-sonar.sh run
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build:
+          context: DockerHub
