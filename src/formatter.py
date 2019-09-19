@@ -75,7 +75,7 @@ def format_time(record):
     https://en.wikipedia.org/wiki/ISO_8601
     """
     utc_time = time.gmtime(record.created)
-    time_string = time.strftime('%Y-%m-%d %H:%M:%S', utc_time)
+    time_string = time.strftime('%Y-%m-%dT%H:%M:%S', utc_time)
     return '%s.%03dZ' % (time_string, record.msecs)
 
 
